@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="WpfApp" Language="1033" Version="1.0.25.0" Manufacturer="WpfApp" UpgradeCode="{7AE66D7F-8AA0-4CF5-882E-346994369C09}">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate EmbedCab="yes" />
+
+		<Feature Id="ProductFeature" Title="WpfApp" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentRef Id="ApplicationShortcut" />
+		</Feature>
+		<WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+		<WixVariable Id="WixUIDialogBmp" Value="dialog.jpg" />
+		<WixVariable Id="WixUIBannerBmp" Value="banner.jpg" />
+		<UI>
+			<UIRef Id="WixUI_Minimal" />
+			<Publish Dialog="ExitDialog"
+				 Control="Finish"
+				 Event="DoAction"
+				 Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+		</UI>
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch WpfApp" />
+
+		<Property Id="WixShellExecTarget" Value="[#wpfapp.exe]" />
+		<CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="WpfApp" />
+			</Directory>
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="WpfApp"/>
+			</Directory>
+		</Directory>
+
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ApplicationShortcut" Guid="{0F6D34E4-1E82-4A12-836D-F4C7F64D327E}">
+				<Shortcut Id="ApplicationStartMenuShortcut" 
+						  Name="WpfApp"
+						  Description="My Application Description"
+						  Target="[#wpfapp.exe]"
+						  WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+				<RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\MyCompany\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<Component Id="ProductComponent" Guid="{7AA60D1D-2121-4C4F-9FDC-525566C91572}">
+				<File Id="zzz.ico" Source="cat.ico" />
+				<File Id="wpfapp.exe" Name="wpfapp.exe" KeyPath="yes" src="C:\Users\sangmoon\source\repos\MyWpfApp\WpfApp\bin\Release\net7.0-windows\publish\win-x64\WpfApp.exe"/>
+				<ProgId Id="zzz file" Description="zzz file" Icon="zzz.ico">
+					<Extension Id="zzz" ContentType="application/zzz">
+						<Verb Id="open" Command="Open" TargetFile="wpfapp.exe" Argument="%1" />
+					</Extension>
+				</ProgId>
+				<Registry Id="zzzIcon1" Root="HKCR" Key=".zzz" Action="write" Type="string" Value="wpfapp.zzzfile"/>
+				<Registry Id="zzzIcon2" Root="HKCR" Key="wpfapp.zzzfile" Action="write" Type="string" Value="wpfapp data file"/>
+				<Registry Id="zzzIcon3" Root="HKCR" Key="wpfapp.zzzfile\DefaultIcon" Action="write" Type="string" Value="[INSTALLFOLDER]cat.ico"/>
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+
+	<Fragment>
+		<InstallExecuteSequence>
+			<RemoveExistingProducts After="InstallInitialize" />
+			<Custom Action ="InstallFiles" After="InstallInitialize">NOT REMOVE</Custom>
+			<Custom Action="TerminateApp" Before="StopServices">Installed OR REMOVE~="ALL"</Custom>
+		</InstallExecuteSequence>
+	</Fragment>
+</Wix>
